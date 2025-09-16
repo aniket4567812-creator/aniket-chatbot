@@ -1,73 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aniket's Chatbot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #222;
-      padding: 20px;
-      font-size: 24px;
-      font-weight: bold;
-    }
-    .chatbox {
-      margin: 20px auto;
-      width: 90%;
-      max-width: 400px;
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: left;
-    }
-    .messages {
-      height: 200px;
-      overflow-y: auto;
-      margin-bottom: 10px;
-    }
-    .user { color: #0f0; }
-    .bot { color: #0ff; }
-    input {
-      width: 75%;
-      padding: 10px;
-    }
-    button {
-      padding: 10px;
-    }
-  </style>
-</head>
-<body>
-  <header>Aniket's Chatbot</header>
-  <div class="chatbox">
-    <div class="messages" id="messages"></div>
-    <input type="text" id="userInput" placeholder="Type your message...">
-    <button onclick="sendMessage()">Send</button>
-  </div>
+<!-- HTML -->
+<input id="userInput" type="text" placeholder="Type your message">
+<button id="sendBtn">Send</button>
+<div id="chatWindow"></div>
 
-  <script>
-    function sendMessage() {
-      let input = document.getElementById("userInput");
-      let msg = input.value.trim();
-      if (!msg) return;
+<script>
+  const input = document.getElementById("userInput");
+  const btn = document.getElementById("sendBtn");
+  const chat = document.getElementById("chatWindow");
 
-      let messagesDiv = document.getElementById("messages");
-      messagesDiv.innerHTML += "<div class='user'>You: " + msg + "</div>";
+  btn.addEventListener("click", () => {
+      const message = input.value.trim();
+      if(message){
+          displayUserMessage(message);
+          displayBotMessage(generateBotReply(message));
+          input.value = "";
+      }
+  });
 
-      // Simple fake reply logic
-      let reply = "Hello Aniket! You said: " + msg;
+  function displayUserMessage(msg){
+      chat.innerHTML += `<div><b>You:</b> ${msg}</div>`;
+  }
 
-      messagesDiv.innerHTML += "<div class='bot'>Bot: " + reply + "</div>";
-      input.value = "";
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-  </script>
-</body>
-</html>
+  function displayBotMessage(msg){
+      chat.innerHTML += `<div><b>Bot:</b> ${msg}</div>`;
+  }
+
+  function generateBotReply(msg){
+      // Example logic
+      msg = msg.toLowerCase();
+      if(msg.includes("hello") || msg.includes("hi")) return "Hello! How can I help you?";
+      if(msg.includes("how are you")) return "I am fine, thank you!";
+      return "Sorry, I didn't understand that.";
+  }
+</script>
