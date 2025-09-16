@@ -20,84 +20,53 @@
       font-weight: bold;
     }
     .chatbox {
+      margin: 20px auto;
       width: 90%;
-      max-width: 500px;
-      margin: 30px auto;
-      background: #1e1e1e;
-      border-radius: 10px;
+      max-width: 400px;
+      background: #333;
       padding: 20px;
+      border-radius: 10px;
       text-align: left;
     }
     .messages {
-      height: 300px;
+      height: 200px;
       overflow-y: auto;
-      border: 1px solid #333;
-      padding: 10px;
-      border-radius: 5px;
-      background: #000;
+      margin-bottom: 10px;
     }
-    .bot {
-      color: #0f0;
-      margin: 5px 0;
-    }
-    .user {
-      color: #0af;
-      margin: 5px 0;
-      text-align: right;
-    }
+    .user { color: #0f0; }
+    .bot { color: #0ff; }
     input {
       width: 75%;
       padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 5px;
     }
     button {
-      padding: 10px 15px;
-      border: none;
-      background: #0af;
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #08c;
+      padding: 10px;
     }
   </style>
 </head>
 <body>
-  <header>🤖 Aniket's Chatbot</header>
+  <header>Aniket's Chatbot</header>
   <div class="chatbox">
-    <div class="messages" id="messages">
-      <div class="bot">Hello! I am your chatbot. Ask me anything 🙂</div>
-    </div>
-    <input type="text" id="userInput" placeholder="Type your message..." />
+    <div class="messages" id="messages"></div>
+    <input type="text" id="userInput" placeholder="Type your message...">
     <button onclick="sendMessage()">Send</button>
   </div>
 
   <script>
     function sendMessage() {
-      const input = document.getElementById("userInput");
-      const msg = input.value.trim();
-      if (msg === "") return;
+      let input = document.getElementById("userInput");
+      let msg = input.value.trim();
+      if (!msg) return;
 
-      const messages = document.getElementById("messages");
+      let messagesDiv = document.getElementById("messages");
+      messagesDiv.innerHTML += "<div class='user'>You: " + msg + "</div>";
 
-      // Show user message
-      const userMsg = document.createElement("div");
-      userMsg.className = "user";
-      userMsg.innerText = msg;
-      messages.appendChild(userMsg);
+      // Simple fake reply logic
+      let reply = "Hello Aniket! You said: " + msg;
 
-      // Bot reply (dummy)
-      const botMsg = document.createElement("div");
-      botMsg.className = "bot";
-      botMsg.innerText = "You said: " + msg;
-      messages.appendChild(botMsg);
-
-      // Clear input
+      messagesDiv.innerHTML += "<div class='bot'>Bot: " + reply + "</div>";
       input.value = "";
-      messages.scrollTop = messages.scrollHeight;
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
   </script>
 </body>
