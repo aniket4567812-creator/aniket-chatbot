@@ -1,114 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Smart Chatbot</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f2f2f2;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    header {
-      font-size: 24px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-    #chatBox {
-      background-color: #ffffff;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      padding: 15px;
-      max-width: 600px;
-      width: 100%;
-      height: 400px;
-      overflow-y: auto;
-      margin-bottom: 20px;
-    }
-    .message {
-      margin: 10px 0;
-    }
-    .user {
-      color: #007bff;
-      font-weight: bold;
-    }
-    .bot {
-      color: #28a745;
-      font-weight: bold;
-    }
-    #userInput {
-      width: 500px;
-      max-width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      box-sizing: border-box;
-    }
-    button {
-      padding: 10px 15px;
-      font-size: 16px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
-    footer {
-      margin-top: auto;
-      font-size: 14px;
-      color: #666;
-      margin-top: 30px;
-    }
-  </style>
-</head>
-<body>
-  <header>🤖 AI Chatbot — Made by Aniket</header>
+const http = require("http");
 
-  <div id="chatBox"></div>
+const port = process.env.PORT || 8080;
 
-  <div>
-    <input type="text" id="userInput" placeholder="Ask me anything..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
+let lastMessage = "Hi! I'm your AI chatbot, made by Aniket. How can I help you today?";
 
-  <footer>© 2025 Aniket's AI Chatbot</footer>
+const server = http.createServer((req, res) => {
+  if (req.method === "POST" && req.url === "/chatbot") {
+    let body = "";
+    req.on("data", chunk => {
+      body += chunk.toString();
+    });
+    req.on("end", () => {
+      const userMessage = JSON.parse(body).message;
+      // Simple AI reply logic (basically echo)
+      const replyMessage = `You said: "${userMessage}". Made by Aniket!`;
+      lastMessage = replyMessage;
 
-  <script>
-    const apiKey = "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"; // 🔒 Paste your actual API key here
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ reply: replyMessage }));
+    });
+  } else if (req.url === "/") {
+    res.writeHead(200, { "Content-Type": "text/html" });
+    res.end(`
+      <html>
+      <head>
+        <title>Aniket's AI Chatbot</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 30px; background: #121212; color: #eee; }
+          #chatbox { width: 400px; height: 300px; border: 1px solid #555; padding: 10px; overflow-y: scroll; background: #222; }
+          #inputBox { width: 350px; padding: 10px; margin-top: 10px; }
+          button { padding: 10px; }
+          .message { margin: 5px 0; }
+          .user { color: #6cf; }
+          .bot { color: #fc6; }
+        </style>
+      </head>
+      <body>
+        <h1>Aniket's AI Chatbot</h1>
+        <div id="chatbox"></div>
+        <input type="text" id="inputBox" placeholder="Type your message..." />
+        <button onclick="sendMessage()">Send</button>
 
-    async function sendMessage() {
-      const inputField = document.getElementById("userInput");
-      const userMessage = inputField.value.trim();
-      if (!userMessage) return;
+        <script>
+          const chatbox = document.getElementById('chatbox');
+          const inputBox = document.getElementById('inputBox');
 
-      const chatBox = document.getElementById("chatBox");
+          function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            div.classList.add('message');
+            div.classList.add(sender);
+            chatbox.appendChild(div);
+            chatbox.scrollTop = chatbox.scrollHeight;
+          }
 
-      // Show user message
-      chatBox.innerHTML += `<div class="message user">👤 You: ${userMessage}</div>`;
-      inputField.value = "";
+          function sendMessage() {
+            const message = inputBox.value.trim();
+            if (!message) return;
+            addMessage('You: ' + message, 'user');
+            inputBox.value = '';
 
-      try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: userMessage }]
-          })
-        });
+            fetch('/chatbot', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message })
+            })
+            .then(res => res.json())
+            .then(data => {
+              addMessage('Bot: ' + data.reply, 'bot');
+            })
+            .catch(() => addMessage('Bot: Error contacting server.', 'bot'));
+          }
 
-        const data = await response.json();
-        const botReply = data.choices?.[0]?.message?.content || "Sorry, I couldn't understand that.";
-        chatBox.innerHTML += `<div class="message bot">🤖 Bot: ${botReply}</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-      } catch (error) {
-        chatBox.innerHTML += `<div class="message bot">⚠️ Error: ${error.message}</div>`;
-      }
-    }
-  </script>
-</body>
-</html>
+          // Welcome message
+          addMessage('Bot: Hi! I\'m your AI chatbot, made by Aniket. How can I help you today?', 'bot');
+
+          inputBox.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+              sendMessage();
+            }
+          });
+        </script>
+      </body>
+      </html>
+    `);
+  } else {
+    res.writeHead(404);
+    res.end("Not Found");
+  }
+});
+
+server.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}/`);
+});
